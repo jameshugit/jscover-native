@@ -39,7 +39,7 @@
 #include "util.h"
 
 static const char * specified_encoding = NULL;
-const char * jscoverage_encoding = "ISO-8859-1";
+const char * jscoverage_encoding = "UTF-8";
 bool jscoverage_highlight = true;
 
 struct in_addr jscoverage_ip_address;
@@ -67,6 +67,7 @@ static const struct {
   {".js", "text/javascript"},
   {".txt", "text/plain"},
   {".xml", "application/xml"},
+  {".json", "application/json"},
 };
 
 static bool verbose = false;
