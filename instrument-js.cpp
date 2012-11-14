@@ -1377,7 +1377,8 @@ static void instrument_statement(JSParseNode * node, Stream * f, int indent, boo
     /* the root node has line number 0 */
     if (line != 0) {
       Stream_printf(f, "%*s", indent, "");
-      Stream_printf(f, "_$jscoverage['%s'][%d]++;\n", file_id, line);
+      //Stream_printf(f, "_$jscoverage['%s'][%d]++;\n", file_id, line);
+      Stream_printf(f, "_$jscoverage.hit('%s', %d);\n", file_id, line);
       lines[line - 1] = 1;
     }
   }
@@ -1563,23 +1564,27 @@ void jscoverage_instrument_js(const char * id, const uint16_t * characters, size
     Stream_write_string(output, "if (typeof _$jscoverage === 'undefined') {\n  var _$jscoverage = {};\n}\n");
     break;
   }
+/*
   Stream_printf(output, "if (! _$jscoverage['%s']) {\n", file_id);
   Stream_printf(output, "  _$jscoverage['%s'] = [];\n", file_id);
+*/
+  Stream_printf(output, "_$jscoverage.mark('%s', [", file_id);
   for (uint32_t i = 0; i < num_lines; i++) {
     if (lines[i]) {
-      Stream_printf(output, "  _$jscoverage['%s'][%d] = 0;\n", file_id, i + 1);
+      Stream_printf(output, "%d,", i + 1);
     }
   }
-  Stream_write_string(output, "}\n");
+  Stream_write_string(output, "]);\n");
+
   free(lines);
   lines = NULL;
   free(exclusive_directives);
   exclusive_directives = NULL;
 
   /* copy the original source to the output */
-  Stream_printf(output, "_$jscoverage['%s'].source = ", file_id);
-  jscoverage_write_source(id, characters, num_characters, output);
-  Stream_printf(output, ";\n");
+  //Stream_printf(output, "_$jscoverage['%s'].source = ", file_id);
+  //jscoverage_write_source(id, characters, num_characters, output);
+  //Stream_printf(output, ";\n");
 
   /* conditionals */
   if (has_conditionals) {

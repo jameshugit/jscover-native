@@ -27,6 +27,8 @@ AC_PROG_CC
 AC_PROG_CC_C99
 AC_PROG_CXX
 
+AC_PROG_RANLIB
+
 case "$host_os" in
   cygwin*)
     CC="$CC -mno-cygwin"

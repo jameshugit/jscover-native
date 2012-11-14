@@ -56,6 +56,12 @@ jscoverage_server_SOURCES = http-connection.c \
                             $(resources)
 jscoverage_server_LDADD = @SPIDERMONKEY_LIBS@ -lm @EXTRA_SOCKET_LIBS@ @EXTRA_THREAD_LIBS@ @LIBICONV@ @EXTRA_TIMER_LIBS@
 
+lib_LIBRARIES = libjscoverage.a 
+libjscoverage_a_OBJS = encoding.o highlight.o instrument.o instrument-js.o resource-manager.o stream.o util.o js/jsapi.o js/jsarena.o js/jsarray.o js/jsatom.o js/jsbool.o js/jscntxt.o js/jsdate.o js/jsdbgapi.o js/jsdhash.o js/jsdtoa.o js/jsemit.o js/jsexn.o js/jsfun.o js/jsgc.o js/jshash.o js/jsinterp.o js/jsinvoke.o js/jsiter.o js/jslock.o js/jslog2.o js/jsmath.o js/jsnum.o js/jsobj.o js/json.o js/jsopcode.o js/jsparse.o js/jsprf.o js/jsregexp.o js/jsscan.o js/jsscope.o js/jsscript.o js/jsstr.o js/jstask.o js/jsutil.o js/jsxdrapi.o js/jsxml.o js/prmjtime.o
+libjscoverage.a: $(libjscoverage_a_OBJS)
+	ar cru $@ $(libjscoverage_a_OBJS)
+	ranlib $@
+
 noinst_PROGRAMS = generate-resources
 generate_resources_SOURCES = generate-resources.c
 

@@ -37,6 +37,9 @@
 
 static int g_verbose = 0;
 
+static char * g_output = NULL;
+static int g_output_length = 0;
+
 static int string_ends_with(const char * s, const char * suffix) {
   size_t length = strlen(s);
   size_t suffix_length = strlen(suffix);
@@ -142,6 +145,73 @@ static void instrument_file(const char * source_file, const char * destination_f
 
     copy_file(source_file, destination_file);
   }
+}
+
+void jscoverage_string_quote(char ** dst, const char* src, int len)
+{
+  for(int pos = 0; pos < len; pos++) {
+    if(src[pos] == '\r') continue;
+
+    if(src[pos] == '\n') {
+      *(*dst)++ = '\\'; *(*dst)++ = 'n';
+      continue;
+    }
+
+    if(src[pos] == '"' || src[pos] == '\\') *(*dst)++ = '\\';
+    *(*dst)++ = src[pos];
+  }
+}
+
+const char * jscoverage_instrument_string(const char * content, const char * id)
+{
+  Stream * jscode_output_stream = Stream_new(0);
+  Stream * source_output_stream = Stream_new(0);
+
+  size_t num_characters = strlen(content);
+  uint16_t * characters = NULL;
+
+  jscoverage_init();
+
+  int result = jscoverage_bytes_to_characters(jscoverage_encoding, content, strlen(content), &characters, &num_characters);
+  if(result == JSCOVERAGE_ERROR_ENCODING_NOT_SUPPORTED || result == JSCOVERAGE_ERROR_INVALID_BYTE_SEQUENCE) {
+    Stream_delete(jscode_output_stream);
+    Stream_delete(source_output_stream);
+    return NULL;
+  }
+  
+  jscoverage_instrument_js(id, characters, num_characters, jscode_output_stream);
+  jscoverage_write_source(id, characters, num_characters, source_output_stream);
+  free(characters);
+
+  if(jscode_output_stream->length == 0 || source_output_stream == 0) {
+    Stream_delete(jscode_output_stream);
+    Stream_delete(source_output_stream);
+    return NULL;
+  }
+
+  int max_length = 2 * (jscode_output_stream->length + source_output_stream->length);
+  
+  if(max_length >= g_output_length) {
+    if(g_output) free(g_output);
+
+    g_output_length = max_length + 1;
+    g_output = (char*)malloc(g_output_length);
+  }
+
+  memset(g_output, '\0', g_output_length);
+
+  int pos = 0; char * ptr = g_output;
+
+  *ptr++ = '['; *ptr++ = '"';
+  jscoverage_string_quote(&ptr, jscode_output_stream->data, jscode_output_stream->length);
+  *ptr++ = '"'; *ptr++ = ','; *ptr++ = '"';
+  jscoverage_string_quote(&ptr, source_output_stream->data, source_output_stream->length);
+  *ptr++ = '"'; *ptr++ = ']';
+
+  Stream_delete(jscode_output_stream);
+  Stream_delete(source_output_stream);
+
+  return g_output;
 }
 
 void jscoverage_instrument(const char * source,
