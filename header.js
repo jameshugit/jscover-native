@@ -32,7 +32,7 @@ if (typeof window._$jscoverage == 'undefined') {
     /**
      * Push data to server
      */
-    upload: function(force) {
+    upload: function(force, extra) {
       /**
        * Avoid dup upload
        */
@@ -41,7 +41,8 @@ if (typeof window._$jscoverage == 'undefined') {
       this._uploading = true;
 
       try {
-        $.post('/jscoverage/upload', this._serialize(this._data))
+        if(extra == undefined) extra = {};
+        $.post('/jscoverage/upload', this._serialize({data:this._data,extra:extra}))
         .success(function() {
           for (var file in _$jscoverage._data) {
             var length = _$jscoverage._data[file].length;
