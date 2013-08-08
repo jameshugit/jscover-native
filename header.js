@@ -65,8 +65,8 @@ if (typeof window._$jscoverage == 'undefined') {
     _serialize: function(data) {
       var json = [];
 
-      for (var file in data) {
-        var coverage = data[file];
+      for (var file in data['data']) {
+        var coverage = data['data'][file];
 
         var array = [];
         var length = coverage.length;
@@ -81,7 +81,15 @@ if (typeof window._$jscoverage == 'undefined') {
         json.push(this._quote(file) + ':[' + array.join(',') + ']');
       }
   
-      return '{' + json.join(',') + '}';
+      var cdata = '\'data\':{' + json.join(',') + '}';
+
+      json = [];
+      for (var name in data['extra']) {
+        json.push(this._quote(name) + ':' + this._quote(data['extra'][name]));
+      }
+      var edata = '\'extra\':{' + json.join(',') + '}';
+
+      return '{' + cdata + ',' + edata + '}';
     },
     _quote: function(s) {
       return '"' + s.replace(/[\u0000-\u001f"\\\u007f-\uffff]/g, function (c) {
