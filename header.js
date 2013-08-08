@@ -73,7 +73,7 @@ if (typeof window._$jscoverage == 'undefined') {
         for (var line = 0; line < length; line++) {
           var value = coverage[line];
           if (value === undefined || value === null) {
-            value = 'null';
+            value = '-1';
           }
           array.push(value);
         }
@@ -81,13 +81,13 @@ if (typeof window._$jscoverage == 'undefined') {
         json.push(this._quote(file) + ':[' + array.join(',') + ']');
       }
   
-      var cdata = '\'data\':{' + json.join(',') + '}';
+      var cdata = '"data":{' + json.join(',') + '}';
 
       json = [];
       for (var name in data['extra']) {
         json.push(this._quote(name) + ':' + this._quote(data['extra'][name]));
       }
-      var edata = '\'extra\':{' + json.join(',') + '}';
+      var edata = '"extra":{' + json.join(',') + '}';
 
       return '{' + cdata + ',' + edata + '}';
     },
